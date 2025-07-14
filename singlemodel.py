@@ -30,27 +30,27 @@ chatgpt_url=os.environ.get("OPENAI_URL")
 deepseek_url = os.environ.get("DEEPSEEK_URL")
 xai_url = os.environ.get("XAI_URL")
 
-max_tokens = 1600
-
-
-# Function to generate response based on input text, chat history, and model name
+max_tokens = 500
 def generate_response(input_text: str, model_name: str, chat_history: List[Dict] = None) -> Dict:
     if chat_history is None:
         chat_history = []
 
     responses = {}
 
-    # Check which model is requested and call the appropriate logic
+    
     if model_name == "claude":
         try:
             claude_messages = []
             for chat in chat_history:
                 if chat.get("user", "").strip():
-                    claude_messages.append({"role": "user", "content": chat["user"]})
+                    claude_messages.append({"role": "user", "content": [{"type": "text","text":chat["user"]}]
+                                        })
                 if chat.get("claude", "").strip():
-                    claude_messages.append({"role": "assistant", "content": chat["claude"]})
+                    claude_messages.append({"role": "assistant", "content": [{"type":"text","text":chat["claude"]}]
+                                        })
 
-            claude_messages.append({"role": "user", "content": input_text})
+            claude_messages.append({"role": "user", "content": [{"type":"text","text":input_text}]
+                                })
 
             client = OpenAI(api_key=claude_api_key, 
                             base_url=claude_url)
@@ -60,7 +60,7 @@ def generate_response(input_text: str, model_name: str, chat_history: List[Dict]
                 max_tokens=max_tokens,
                 messages=claude_messages
             )
-            claude_response = response_obj.content[0].text if response_obj and response_obj.content else "No response generated."
+            claude_response = response_obj.choices[0].message.content if response_obj and response_obj.choices else "No response generated."
         
         except ClaudeAuthError:
             claude_response = "Invalid Claude API key."
@@ -181,12 +181,12 @@ def generate_response(input_text: str, model_name: str, chat_history: List[Dict]
     return responses
 
 
-# Main execution block
-if __name__ == "__main__":
-    input_text = "what proteins are involved in Alzheimer's disease"
-    model_name = "gemini"  # Hardcoded model name
 
-    # Simulate backend-provided chat history
+if __name__ == "__main__":
+    input_text = "hello"
+    model_name = "deepseek"  
+
+   
     chat_history = [
         {
             "user": "Hello how are you?",
@@ -198,7 +198,7 @@ if __name__ == "__main__":
         },
     ] 
 
-    # Now you can call the function with the hardcoded model_name
+    
     result = generate_response(input_text, model_name, chat_history)
     json_output = json.dumps(result, indent=2, ensure_ascii=False)
     print(json_output)

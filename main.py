@@ -24,7 +24,7 @@ xai_api_key = os.getenv("XAI_API_KEY")
 genai_model = genai.GenerativeModel('gemini-2.0-flash')
 claude_model = "anthropic/claude-3.5-sonnet" #"claude-3-5-sonnet-20241022" 
 chatgpt_model = "openai/gpt-4-turbo"  #gpt-4o-2024-08-06
-deepseek_model ="deepseek/deepseek-chat" 
+deepseek_model ="deepseek/deepseek-chat-v3-0324" 
 xai_model = "x-ai/grok-3" 
 
 
@@ -34,7 +34,7 @@ deepseek_url = os.environ.get("DEEPSEEK_URL")
 xai_url = os.environ.get("XAI_URL")
 
 
-max_tokens = 1600
+max_tokens = 400
 
 
 def generate_response(input_text: str, chat_history: List[Dict] = None) -> Dict:
@@ -49,12 +49,15 @@ def generate_response(input_text: str, chat_history: List[Dict] = None) -> Dict:
         # Add conversation history
         for chat in chat_history:
             if chat.get("user", "").strip():
-                claude_messages.append({"role": "user", "content": chat["user"]})
+                claude_messages.append({"role": "user", "content": [{"type": "text","text":chat["user"]}]
+                                        })
             if chat.get("claude", "").strip():
-                claude_messages.append({"role": "assistant", "content": chat["claude"]})
+                claude_messages.append({"role": "assistant", "content": [{"type":"text","text":chat["claude"]}]
+                                        })
         
         # Add current input
-        claude_messages.append({"role": "user", "content": input_text})
+        claude_messages.append({"role": "user", "content": [{"type":"text","text":input_text}]
+                                })
 
         client = OpenAI(api_key=claude_api_key,
                         base_url=claude_url)
@@ -64,7 +67,7 @@ def generate_response(input_text: str, chat_history: List[Dict] = None) -> Dict:
             max_tokens=max_tokens,
             messages=claude_messages
         )
-        claude_response = response_obj.content[0].text if response_obj and response_obj.content else "No response generated."
+        claude_response = response_obj.choices[0].message.content if response_obj and response_obj.choices else "No response generated."
         
     except ClaudeAuthError:
         claude_response = "Invalid Claude API key."
@@ -205,7 +208,7 @@ def generate_response(input_text: str, chat_history: List[Dict] = None) -> Dict:
     return responses
 
 if __name__ == "__main__":
-    input_text = "what proteins are involved in Alzheimer's disease"
+    input_text = "hello"
 
     # Simulate backend-provided chat history
     chat_history = [
