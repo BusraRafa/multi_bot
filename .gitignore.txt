@@ -1,4 +1,0 @@
-venv/
-.env.txt
-draft_main.py
-testV2.py
