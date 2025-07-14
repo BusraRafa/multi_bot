@@ -34,7 +34,7 @@ deepseek_url = os.environ.get("DEEPSEEK_URL")
 xai_url = os.environ.get("XAI_URL")
 
 
-max_tokens = 3000
+max_tokens = 1600
 
 
 def generate_response(input_text: str, chat_history: List[Dict] = None) -> Dict:
