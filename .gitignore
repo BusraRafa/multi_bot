@@ -1,10 +1,4 @@
-# Ignore virtual environment
 venv/
-
-# Ignore .env file (or if it's named something else, e.g., .env.txt)
 .env
-.env.txt
-
-# Ignore specific Python files
 draft_main.py
 testV2.py
